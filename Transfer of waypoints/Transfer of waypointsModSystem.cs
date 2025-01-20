@@ -23,21 +23,21 @@ namespace Transfer_of_waypoints
 
             api.ChatCommands
                 .Create("import")
-                .WithDescription("Зчитує і фільтрує дані з лог-файлу клієнта.")
+                .WithDescription("Зчитує і загружає")
                 .HandleWith(importWp);
 
             api.ChatCommands
                 .Create("export")
-                .WithDescription("Зчитує і відправляє точки в чат.")
+                .WithDescription("Зчитує і вигружає.")
                 .HandleWith(exportWp);
         }
 
         // Перша команда - записуємо точки з client-chat.log в filtered_waypoints.txt
-        private TextCommandResult importWp(TextCommandCallingArgs args)
+        private TextCommandResult exportWp(TextCommandCallingArgs args)
         {
             if (isImporting)
             {
-                return TextCommandResult.Success("Імпорт вже активний.");
+                return TextCommandResult.Success("Експорт вже активний.");
             }
 
             isImporting = true;
@@ -106,11 +106,11 @@ namespace Transfer_of_waypoints
         }
 
         // Друга команда - імпортуємо точки з filtered_waypoints.txt і відправляємо їх в чат
-        private TextCommandResult exportWp(TextCommandCallingArgs args)
+        private TextCommandResult importWp(TextCommandCallingArgs args)
         {
           if (isImporting)
            {
-                return TextCommandResult.Success("Експорт  вже активний.");
+                return TextCommandResult.Success("Імпорт  вже активний.");
            }
 
             isImporting = true;
@@ -122,7 +122,7 @@ namespace Transfer_of_waypoints
             // Починаємо відправку точок
             api.World.RegisterGameTickListener(SendWaypoint, 1050);  // Відправляти кожну секунду (1000 мс)
 
-            return TextCommandResult.Success("Експорт точок почався.");
+            return TextCommandResult.Success("Імпорт точок почався.");
         }
 
         // Завантажуємо точки з файлу
@@ -169,7 +169,7 @@ namespace Transfer_of_waypoints
             {
                 // Якщо всі точки відправлені, завершимо процес
                 isImporting = false;
-                 api.ShowChatMessage("Всі точки експортовані.");
+                 api.ShowChatMessage("Всі точки імпортовані.");
             }
         }
     }
