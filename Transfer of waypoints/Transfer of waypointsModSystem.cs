@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Threading;
 using Vintagestory.API.Common;
 using Vintagestory.API.Client;
 
@@ -14,7 +15,11 @@ namespace Transfer_of_waypoints
         private int currentIndex = 0;  // Індекс для наступної точки
 
         // Шлях до файлів
-        private string outputPath = @"C:/Users/Asus/AppData/Roaming/VintagestoryData/filtered_waypoints.txt";
+        private static string userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+        // Формуємо повний шлях
+        string outputPath = Path.Combine(userFolderPath, "VintagestoryData", "filtered_waypoints.txt");
+       
 
         // Перша команда: записуємо точки у файл
         public override void StartClientSide(ICoreClientAPI api)
@@ -35,6 +40,10 @@ namespace Transfer_of_waypoints
         // Перша команда - записуємо точки з client-chat.log в filtered_waypoints.txt
         private TextCommandResult exportWp(TextCommandCallingArgs args)
         {
+            api.SendChatMessage($"/waypoint list");
+
+            Thread.Sleep(1000);
+
             if (isImporting)
             {
                 return TextCommandResult.Success("Експорт вже активний.");
@@ -42,9 +51,9 @@ namespace Transfer_of_waypoints
 
             isImporting = true;
             filteredLines.Clear();  // Очищаємо попередні точки
-
-            string inputFilePath = @"C:/Users/Asus/AppData/Roaming/VintagestoryData/Logs/client-chat.log";  // Шлях до вхідного файлу
-
+           
+           
+            string inputFilePath = Path.Combine(userFolderPath, "VintagestoryData/Logs", "client-chat.log");
             try
             {
                 using (FileStream fileStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
