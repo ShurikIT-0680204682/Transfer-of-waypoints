@@ -40,9 +40,9 @@ namespace Transfer_of_waypoints
         // Перша команда - записуємо точки з client-chat.log в filtered_waypoints.txt
         private TextCommandResult exportWp(TextCommandCallingArgs args)
         {
-            api.SendChatMessage($"/waypoint list");
+           // api.SendChatMessage($"/waypoint list");
 
-            Thread.Sleep(1000);
+            //Thread.Sleep(1000);
 
             if (isImporting)
             {
