@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CakeBuild", "CakeBuild\CakeBuild.csproj", "{33837277-7B63-4E3B-BB85-5957496DF823}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transfer of waypoints", "Transfer of waypoints\Transfer of waypoints.csproj", "{71CD297F-5278-4F22-8F56-3DC9511FB516}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{33837277-7B63-4E3B-BB85-5957496DF823}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33837277-7B63-4E3B-BB85-5957496DF823}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33837277-7B63-4E3B-BB85-5957496DF823}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33837277-7B63-4E3B-BB85-5957496DF823}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71CD297F-5278-4F22-8F56-3DC9511FB516}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71CD297F-5278-4F22-8F56-3DC9511FB516}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71CD297F-5278-4F22-8F56-3DC9511FB516}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71CD297F-5278-4F22-8F56-3DC9511FB516}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

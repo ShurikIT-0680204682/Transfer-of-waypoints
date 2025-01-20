@@ -1,0 +1,11 @@
+{
+    "type": "Code",
+    "modid": "transfer of waypoints",
+    "name": "Transfer of waypoints",
+    "authors": [
+        "ShuriKIT"
+    ],
+    "side": "Client",
+    "description": "Allows you to transfer tags without downloading the mod to the server",
+    "version": "1.0.0"
+}
