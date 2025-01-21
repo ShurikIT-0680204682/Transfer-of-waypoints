@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Threading;
 using Vintagestory.API.Common;
 using Vintagestory.API.Client;
 
@@ -26,6 +25,10 @@ namespace Transfer_of_waypoints
         {
             this.api = api;  // Зберігаємо доступ до api
 
+           // api.RegisterTranslation("en", "assets/transferofwaypoints/lang/en.json");
+           // api.RegisterTranslation("uk", "assets/transferofwaypoints/lang/uk.json");
+           // api.RegisterTranslation("ru", "assets/transferofwaypoints/lang/ru.json");
+
             api.ChatCommands
                 .Create("import")
                 .WithDescription("Зчитує і загружає")
@@ -40,9 +43,7 @@ namespace Transfer_of_waypoints
         // Перша команда - записуємо точки з client-chat.log в filtered_waypoints.txt
         private TextCommandResult exportWp(TextCommandCallingArgs args)
         {
-           // api.SendChatMessage($"/waypoint list");
-
-            //Thread.Sleep(1000);
+           
 
             if (isImporting)
             {
