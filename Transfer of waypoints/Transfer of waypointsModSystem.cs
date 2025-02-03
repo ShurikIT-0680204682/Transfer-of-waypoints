@@ -3,6 +3,9 @@ using System.IO;
 using System.Collections.Generic;
 using Vintagestory.API.Common;
 using Vintagestory.API.Client;
+using Vintagestory.API.Server;
+using System.Linq;
+using Vintagestory.API.Config;
 
 namespace Transfer_of_waypoints
 {
@@ -12,38 +15,62 @@ namespace Transfer_of_waypoints
         private bool isImporting = false;  // Флаг для відправки точок
         private List<string[]> filteredLines = new List<string[]>();  // Список точок
         private int currentIndex = 0;  // Індекс для наступної точки
-
+        //private int delayValue = 1050;
         // Шлях до файлів
         private static string userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
         // Формуємо повний шлях
         string outputPath = Path.Combine(userFolderPath, "VintagestoryData", "filtered_waypoints.txt");
-       
+
 
         // Перша команда: записуємо точки у файл
         public override void StartClientSide(ICoreClientAPI api)
         {
             this.api = api;  // Зберігаємо доступ до api
 
-           // api.RegisterTranslation("en", "assets/transferofwaypoints/lang/en.json");
-           // api.RegisterTranslation("uk", "assets/transferofwaypoints/lang/uk.json");
-           // api.RegisterTranslation("ru", "assets/transferofwaypoints/lang/ru.json");
+            // api.RegisterTranslation("en", "assets/transferofwaypoints/lang/en.json");
+            // api.RegisterTranslation("uk", "assets/transferofwaypoints/lang/uk.json");
+            // api.RegisterTranslation("ru", "assets/transferofwaypoints/lang/ru.json");
 
             api.ChatCommands
                 .Create("import")
-                .WithDescription("Зчитує і загружає")
+                .WithDescription("unloads waypoints from a buffer file")
+                 .WithArgs(api.ChatCommands.Parsers.Int("int_delay"))
                 .HandleWith(importWp);
 
             api.ChatCommands
                 .Create("export")
-                .WithDescription("Зчитує і вигружає.")
+                .WithDescription("loads waypoints into a buffer file")
                 .HandleWith(exportWp);
+
+            api.ChatCommands
+                .Create("wpchat")
+                .WithDescription("waypoint search by name or number in the list")
+
+                .BeginSubCommand("all")
+                        .WithDescription("Message in global chat")
+                        .RequiresPlayer()
+                        .WithArgs(api.ChatCommands.Parsers.OptionalAll("id_and_name"))
+                        .HandleWith(wpchatall)
+                    .EndSubCommand()
+
+                     .BeginSubCommand("me")
+                        .WithDescription("Message in local chat")
+                        .RequiresPlayer()
+                        .WithArgs(api.ChatCommands.Parsers.OptionalAll("id_and_name"))
+                        .HandleWith(wpchatme)
+                    .EndSubCommand()
+                     ;
+
+
+
+
         }
 
         // Перша команда - записуємо точки з client-chat.log в filtered_waypoints.txt
         private TextCommandResult exportWp(TextCommandCallingArgs args)
         {
-           
+
 
             if (isImporting)
             {
@@ -52,8 +79,8 @@ namespace Transfer_of_waypoints
 
             isImporting = true;
             filteredLines.Clear();  // Очищаємо попередні точки
-           
-           
+
+
             string inputFilePath = Path.Combine(userFolderPath, "VintagestoryData/Logs", "client-chat.log");
             try
             {
@@ -62,7 +89,7 @@ namespace Transfer_of_waypoints
                 {
                     string line;
                     bool isInBlock = false;
-                    string startWord = "точки:"; // Початкове слово
+                    string startWord = Lang.Get("transferofwaypoints:start_copying"); // Початкове слово
                     string endSymbol = "@"; // Кінцевий символ
 
                     while ((line = reader.ReadLine()) != null)
@@ -98,8 +125,8 @@ namespace Transfer_of_waypoints
                     }
                 }
 
-                return TextCommandResult.Success("Фільтровані дані збережені у файл: " + outputPath);
-                
+                return TextCommandResult.Success("The data is stored in the file: " + outputPath);
+
             }
             catch (FileNotFoundException)
             {
@@ -118,10 +145,17 @@ namespace Transfer_of_waypoints
         // Друга команда - імпортуємо точки з filtered_waypoints.txt і відправляємо їх в чат
         private TextCommandResult importWp(TextCommandCallingArgs args)
         {
-          if (isImporting)
-           {
-                return TextCommandResult.Success("Імпорт  вже активний.");
-           }
+
+            int delayValue = (int)args.Parsers[0].GetValue();
+            if (delayValue < 1060)
+            {
+                delayValue = 1060;
+            }
+
+            if (isImporting)
+            {
+                return TextCommandResult.Success("\r\nImport is already active.");
+            }
 
             isImporting = true;
             currentIndex = 0;  // Скидаємо індекс
@@ -130,7 +164,7 @@ namespace Transfer_of_waypoints
             LoadWaypointsFromFile(outputPath);
 
             // Починаємо відправку точок
-            api.World.RegisterGameTickListener(SendWaypoint, 1050);  // Відправляти кожну секунду (1000 мс)
+            api.World.RegisterGameTickListener(SendWaypoint, delayValue);  // Відправляти кожну секунду (1000 мс)
 
             return TextCommandResult.Success("Імпорт точок почався.");
         }
@@ -142,6 +176,7 @@ namespace Transfer_of_waypoints
 
             using (StreamReader reader = new StreamReader(outputPath))
             {
+                reader.ReadLine();
                 string line;
                 while ((line = reader.ReadLine()) != null)
                 {
@@ -179,8 +214,149 @@ namespace Transfer_of_waypoints
             {
                 // Якщо всі точки відправлені, завершимо процес
                 isImporting = false;
-                 api.ShowChatMessage("Всі точки імпортовані.");
+                api.ShowChatMessage("\r\nAll points are imported.");
             }
+        }
+
+        private TextCommandResult wpchatall(TextCommandCallingArgs args)
+        {
+            LoadWaypointsFromFile(outputPath);
+
+            // Перевірка на наявність аргументу
+           
+
+            string input = args[0] as string;
+            int targetIndex = 0;
+
+            // Перевірка, чи є input числом
+            if (int.TryParse(input, out targetIndex))
+            {
+                // Якщо input це число, шукаємо за індексом
+                if (targetIndex >= 0 && targetIndex < filteredLines.Count)
+                {
+                    var waypoint = filteredLines[targetIndex];
+                    string message = $"{targetIndex} {waypoint[0]} {waypoint[1]}"; // Формуємо повідомлення
+                    api.SendChatMessage(message); // Виводимо в чат
+                }
+                else
+                {
+                    api.ShowChatMessage("Index out of range.");
+                }
+            }
+            else
+            {
+               
+
+                if (args.Parsers.Count == 0)
+                {
+                    return TextCommandResult.Error("\r\nEnter the name of the point!");
+                }
+                
+                string searchTerm = args[0].ToString().ToLower(); // Отримуємо аргумент і переводимо в нижній регістр
+                List<string> results = new List<string>();
+                int indexVal = 0;
+                foreach (var waypoint in filteredLines)
+                {
+                    if (waypoint.Length >= 2)  // Переконуємося, що масив містить хоча б 2 елементи
+                    {
+                        
+                        if (waypoint[0].ToLower().Contains(searchTerm))  // Шукаємо по імені
+                        {
+                            results.Add($"{indexVal}: {waypoint[0]} {waypoint[1]}");
+                        }
+                    }
+                    indexVal++;
+                }
+
+                if (results.Count == 0)
+                {
+                    return TextCommandResult.Success("Точка не знайдена.");
+                }
+
+                int index = 0;
+                int delayMs = 1500;  // Затримка 1 секунда (1000 мс)
+
+                api.World.RegisterGameTickListener((dt) =>
+                {
+                    if (index < results.Count)
+                    {
+                        api.SendChatMessage(results[index]);
+                        index++;
+                    }
+                }, delayMs);
+            }
+
+            return TextCommandResult.Success();
+        }
+
+
+        private TextCommandResult wpchatme(TextCommandCallingArgs args)
+        {
+            LoadWaypointsFromFile(outputPath);
+
+            string input = args[0] as string;
+            int targetIndex = 0;
+
+            // Перевірка, чи є input числом
+            if (int.TryParse(input, out targetIndex))
+            {
+                // Якщо input це число, шукаємо за індексом
+                if (targetIndex >= 0 && targetIndex < filteredLines.Count)
+                {
+                    var waypoint = filteredLines[targetIndex];
+                    string message = $"{targetIndex}: {waypoint[0]} {waypoint[1]}"; // Формуємо повідомлення
+                    api.ShowChatMessage(message); // Виводимо в чат
+                }
+                else
+                {
+                    api.ShowChatMessage("Index out of range.");
+                }
+            }
+            else
+            {
+               
+
+                if (args.Parsers.Count == 0)
+                {
+                    return TextCommandResult.Error("\r\nEnter the name of the point!");
+                }
+
+                string searchTerm = args[0].ToString().ToLower(); // Отримуємо аргумент і переводимо в нижній регістр
+                List<string> results = new List<string>();
+                int indexVal = 0;
+
+                foreach (var waypoint in filteredLines)
+                {
+                    if (waypoint.Length >= 2)  // Переконуємося, що масив містить хоча б 2 елементи
+                    {
+
+                        if (waypoint[0].ToLower().Contains(searchTerm))  // Шукаємо по імені
+                        {
+                            results.Add($"{indexVal}: {waypoint[0]} {waypoint[1]}");
+                        }
+                    }
+                    indexVal++;
+                }
+
+                if (results.Count == 0)
+                {
+                    return TextCommandResult.Success("Point not found.");
+                }
+
+                int index = 0;
+
+                while (index < results.Count)
+                {
+                   
+                        api.ShowChatMessage(results[index]);
+                        index++;
+                   
+                }
+                
+
+
+            }
+            return TextCommandResult.Success();
         }
     }
 }
