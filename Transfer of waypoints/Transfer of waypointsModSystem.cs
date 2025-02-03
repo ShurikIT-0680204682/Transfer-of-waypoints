@@ -28,10 +28,6 @@ namespace Transfer_of_waypoints
         {
             this.api = api;  // Зберігаємо доступ до api
 
-            // api.RegisterTranslation("en", "assets/transferofwaypoints/lang/en.json");
-            // api.RegisterTranslation("uk", "assets/transferofwaypoints/lang/uk.json");
-            // api.RegisterTranslation("ru", "assets/transferofwaypoints/lang/ru.json");
-
             api.ChatCommands
                 .Create("import")
                 .WithDescription("unloads waypoints from a buffer file")
@@ -124,7 +120,7 @@ namespace Transfer_of_waypoints
                         writer.WriteLine(line);
                     }
                 }
-
+                isImporting = false;
                 return TextCommandResult.Success("The data is stored in the file: " + outputPath);
 
             }
@@ -139,6 +135,10 @@ namespace Transfer_of_waypoints
             catch (Exception ex)
             {
                 return TextCommandResult.Error("Невідома помилка: " + ex.Message);
+            }
+            finally
+            {
+                isImporting = false; 
             }
         }
 
