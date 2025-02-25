@@ -1,10 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using Vintagestory.API.Common;
+using System.IO;
 using Vintagestory.API.Client;
-using Vintagestory.API.Server;
-using System.Linq;
+using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 
 namespace Transfer_of_waypoints
@@ -138,7 +136,7 @@ namespace Transfer_of_waypoints
             }
             finally
             {
-                isImporting = false; 
+                isImporting = false;
             }
         }
 
@@ -223,8 +221,11 @@ namespace Transfer_of_waypoints
             LoadWaypointsFromFile(outputPath);
 
             // Перевірка на наявність аргументу
-           
 
+            if (args[0] == null)
+            {
+                return TextCommandResult.Error("Argument missing");
+            }
             string input = args[0] as string;
             int targetIndex = 0;
 
@@ -245,13 +246,13 @@ namespace Transfer_of_waypoints
             }
             else
             {
-               
+
 
                 if (args.Parsers.Count == 0)
                 {
                     return TextCommandResult.Error("\r\nEnter the name of the point!");
                 }
-                
+
                 string searchTerm = args[0].ToString().ToLower(); // Отримуємо аргумент і переводимо в нижній регістр
                 List<string> results = new List<string>();
                 int indexVal = 0;
@@ -259,7 +260,7 @@ namespace Transfer_of_waypoints
                 {
                     if (waypoint.Length >= 2)  // Переконуємося, що масив містить хоча б 2 елементи
                     {
-                        
+
                         if (waypoint[0].ToLower().Contains(searchTerm))  // Шукаємо по імені
                         {
                             results.Add($"{indexVal}: {waypoint[0]} {waypoint[1]}");
@@ -294,6 +295,11 @@ namespace Transfer_of_waypoints
         {
             LoadWaypointsFromFile(outputPath);
 
+            if (args[0] == null)
+            {
+                return TextCommandResult.Error("Argument missing");
+            }
+
             string input = args[0] as string;
             int targetIndex = 0;
 
@@ -314,7 +320,7 @@ namespace Transfer_of_waypoints
             }
             else
             {
-               
+
 
                 if (args.Parsers.Count == 0)
                 {
@@ -347,12 +353,12 @@ namespace Transfer_of_waypoints
 
                 while (index < results.Count)
                 {
-                   
-                        api.ShowChatMessage(results[index]);
-                        index++;
-                   
+
+                    api.ShowChatMessage(results[index]);
+                    index++;
+
                 }
-                
+
 
 
             }
