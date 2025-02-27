@@ -68,7 +68,7 @@ namespace Transfer_of_waypoints
 
             if (isImporting)
             {
-                return TextCommandResult.Success("Експорт вже активний.");
+                return TextCommandResult.Success("Export is already active.");
             }
 
             isImporting = true;
@@ -89,7 +89,7 @@ namespace Transfer_of_waypoints
                     while ((line = reader.ReadLine()) != null)
                     {
                         // Початок блоку
-                        if (line.Contains(startWord))
+                        if (line.Contains(startWord) || line.Contains("waypoints:"))
                         {
                             isInBlock = true;
                         }
@@ -105,6 +105,10 @@ namespace Transfer_of_waypoints
                                 break; // Завершуємо після досягнення кінця блоку
                             }
                         }
+                    }
+                    if (filteredLines.Count == 0)
+                    {
+                        return TextCommandResult.Error("No waypoints or no previous command entered.");
                     }
                 }
 
